@@ -1,0 +1,10 @@
+/target
+**/*.rs.bk
+.vscode
+.rrun_ignore
+**/.idea/**
+.env.*
+/tmp
+.DS_Store
+*.pdb
+Cargo.lock
