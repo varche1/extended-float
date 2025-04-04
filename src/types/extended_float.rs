@@ -71,6 +71,7 @@ impl<T: Float + fmt::Debug + fmt::Display> From<ExtendedFloat<T>> for String {
 }
 
 #[cfg(test)]
+#[allow(clippy::excessive_precision)]
 mod tests {
     use super::*;
     use crate::constants::f64::{
