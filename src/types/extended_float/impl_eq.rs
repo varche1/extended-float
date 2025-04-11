@@ -331,7 +331,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_zero_equality() {
         // Test zero equality
