@@ -1,12 +1,12 @@
-use std::fmt;
 use std::fmt::Write;
 
-use super::super::traits::float::Float;
+use crate::traits::{DisplayableFloat, Float};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct ExtendedFloat<T: Float + fmt::Debug + fmt::Display>(pub T);
+#[derive(Debug, Clone, Copy)]
+pub struct ExtendedFloat<T: DisplayableFloat>(pub T);
 
-impl<T: Float + fmt::Debug + fmt::Display> ExtendedFloat<T> {
+// TODO: make a forbidden of NaN, Inf, etc...
+impl<T: DisplayableFloat> ExtendedFloat<T> {
     pub fn new(value: T) -> Self {
         Self(value)
     }
@@ -49,24 +49,6 @@ impl<T: Float + fmt::Debug + fmt::Display> ExtendedFloat<T> {
         }
 
         formatted
-    }
-}
-
-impl<T: Float + fmt::Debug + fmt::Display> fmt::Display for ExtendedFloat<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.format())
-    }
-}
-
-impl<T: Float + fmt::Debug + fmt::Display> From<T> for ExtendedFloat<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-
-impl<T: Float + fmt::Debug + fmt::Display> From<ExtendedFloat<T>> for String {
-    fn from(value: ExtendedFloat<T>) -> Self {
-        value.to_string()
     }
 }
 

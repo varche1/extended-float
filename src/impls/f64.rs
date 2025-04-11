@@ -2,7 +2,7 @@ use crate::constants::f64::{
     DECIMAL_PRECISION, DECIMAL_PRECISION_DIGITS, EPSILON, MAX_EXPONENT, MIN_EXPONENT,
 };
 use crate::tables::lookup::{EXTRA_DIGITS_TABLE, PRECISION_TABLE};
-use crate::traits::float::Float;
+use crate::traits::Float;
 
 impl Float for f64 {
     fn epsilon() -> f64 {

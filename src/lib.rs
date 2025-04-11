@@ -4,4 +4,4 @@ pub mod tables;
 pub mod traits;
 pub mod types;
 
-pub use traits::float::Float;
+pub use traits::{DisplayableFloat, Float};
