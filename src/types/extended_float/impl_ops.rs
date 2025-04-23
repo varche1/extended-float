@@ -257,19 +257,15 @@ mod tests {
     }
 
     #[test]
-    fn test_zero_division() {
-        // Division by zero should result in infinity
-        let result = ExtendedFloat::new(5.0) / ExtendedFloat::new(0.0);
-        assert!(result.is_infinite());
-        assert!(result.is_sign_positive());
+    #[should_panic]
+    fn test_division_by_zero() {
+        let _ = ExtendedFloat::new(5.0) / ExtendedFloat::new(0.0);
+    }
 
-        let result = ExtendedFloat::new(-5.0) / ExtendedFloat::new(0.0);
-        assert!(result.is_infinite());
-        assert!(result.is_sign_negative());
-
-        // Zero divided by zero should result in NaN
-        let result = ExtendedFloat::new(0.0) / ExtendedFloat::new(0.0);
-        assert!(result.is_nan());
+    #[test]
+    #[should_panic]
+    fn test_zero_division_by_zero() {
+        let _ = ExtendedFloat::new(0.0) / ExtendedFloat::new(0.0);
     }
 
     #[test]
@@ -289,21 +285,35 @@ mod tests {
     }
 
     #[test]
-    fn test_with_edge_cases() {
+    #[should_panic]
+    fn test_with_edge_cases_add() {
         // Test with infinity
-        let inf = ExtendedFloat::new(f64::INFINITY);
-        let neg_inf = ExtendedFloat::new(f64::NEG_INFINITY);
+        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let _ = inf + ExtendedFloat::new(5.0);
+    }
 
-        assert_eq!(inf + ExtendedFloat::new(5.0), inf);
-        assert_eq!(neg_inf + ExtendedFloat::new(5.0), neg_inf);
-        assert_eq!(inf - ExtendedFloat::new(5.0), inf);
-        assert_eq!(neg_inf - ExtendedFloat::new(5.0), neg_inf);
-        assert_eq!(inf * ExtendedFloat::new(5.0), inf);
-        assert_eq!(neg_inf * ExtendedFloat::new(5.0), neg_inf);
-        assert_eq!(inf * ExtendedFloat::new(-5.0), neg_inf);
-        assert_eq!(inf / ExtendedFloat::new(5.0), inf);
-        assert_eq!(neg_inf / ExtendedFloat::new(5.0), neg_inf);
-        assert_eq!(inf / ExtendedFloat::new(-5.0), neg_inf);
+    #[test]
+    #[should_panic]
+    fn test_with_edge_cases_sub() {
+        // Test with infinity
+        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let _ = inf - ExtendedFloat::new(5.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_with_edge_cases_mul() {
+        // Test with infinity
+        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let _ = inf * ExtendedFloat::new(5.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_with_edge_cases_div() {
+        // Test with infinity
+        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let _ = inf / ExtendedFloat::new(5.0);
     }
 
     #[test]
@@ -534,28 +544,19 @@ mod tests {
 
         // Test with special constants
         assert_eq!(-ExtendedFloat::new(PI), ExtendedFloat::new(-PI));
-
-        // Test with infinity and NaN
-        assert_eq!(
-            -ExtendedFloat::new(f64::INFINITY),
-            ExtendedFloat::new(f64::NEG_INFINITY)
-        );
-        assert_eq!(
-            -ExtendedFloat::new(f64::NEG_INFINITY),
-            ExtendedFloat::new(f64::INFINITY)
-        );
-        assert!((-ExtendedFloat::new(f64::NAN)).is_nan());
     }
 
     #[test]
+    #[should_panic]
     fn test_zero_remainder() {
-        // Remainder by zero should result in NaN
         let result = ExtendedFloat::new(5.0) % ExtendedFloat::new(0.0);
         assert!(result.is_nan());
+    }
 
-        // Zero remainder by zero should result in NaN
-        let result = ExtendedFloat::new(0.0) % ExtendedFloat::new(0.0);
-        assert!(result.is_nan());
+    #[test]
+    #[should_panic]
+    fn test_modulo_by_zero() {
+        let _ = ExtendedFloat::new(5.0) % ExtendedFloat::new(0.0);
     }
 }
 

@@ -370,27 +370,39 @@ mod tests {
     #[test]
     fn test_special_values_f64() {
         // NaN should never equal anything, including itself
-        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(f64::NAN));
-        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(0.0));
-        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(1.0));
+        assert_ne!(
+            ExtendedFloat::new_unchecked(f64::NAN),
+            ExtendedFloat::new_unchecked(f64::NAN)
+        );
+        assert_ne!(
+            ExtendedFloat::new_unchecked(f64::NAN),
+            ExtendedFloat::new_unchecked(0.0)
+        );
+        assert_ne!(
+            ExtendedFloat::new_unchecked(f64::NAN),
+            ExtendedFloat::new_unchecked(1.0)
+        );
 
         // Infinity comparisons
         assert_eq!(
-            ExtendedFloat::new(f64::INFINITY),
-            ExtendedFloat::new(f64::INFINITY)
+            ExtendedFloat::new_unchecked(f64::INFINITY),
+            ExtendedFloat::new_unchecked(f64::INFINITY)
         );
         assert_eq!(
-            ExtendedFloat::new(f64::NEG_INFINITY),
-            ExtendedFloat::new(f64::NEG_INFINITY)
+            ExtendedFloat::new_unchecked(f64::NEG_INFINITY),
+            ExtendedFloat::new_unchecked(f64::NEG_INFINITY)
         );
         assert_ne!(
-            ExtendedFloat::new(f64::INFINITY),
-            ExtendedFloat::new(f64::NEG_INFINITY)
+            ExtendedFloat::new_unchecked(f64::INFINITY),
+            ExtendedFloat::new_unchecked(f64::NEG_INFINITY)
         );
-        assert_ne!(ExtendedFloat::new(f64::INFINITY), ExtendedFloat::new(0.0));
         assert_ne!(
-            ExtendedFloat::new(f64::NEG_INFINITY),
-            ExtendedFloat::new(0.0)
+            ExtendedFloat::new_unchecked(f64::INFINITY),
+            ExtendedFloat::new_unchecked(0.0)
+        );
+        assert_ne!(
+            ExtendedFloat::new_unchecked(f64::NEG_INFINITY),
+            ExtendedFloat::new_unchecked(0.0)
         );
     }
 
