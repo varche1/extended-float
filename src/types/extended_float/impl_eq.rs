@@ -28,6 +28,8 @@ impl<T: DisplayableFloat> Eq for ExtendedFloat<T> {}
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use crate::constants::f64::EPSILON as EPSILON_F64;
     use crate::types::ExtendedFloat;
 
@@ -424,6 +426,53 @@ mod tests {
         assert_eq!(a, b);
         assert_eq!(b, c);
         assert_eq!(a, c);
+    }
+
+    #[test]
+    fn test_option_equality() {
+        let none_f64: Option<ExtendedFloat<f64>> = None;
+        assert_eq!(none_f64, none_f64);
+
+        assert_eq!(Some(ExtendedFloat::new(1.0)), Some(ExtendedFloat::new(1.0)));
+
+        assert_eq!(
+            Some(ExtendedFloat::new(1.0)),
+            Some(ExtendedFloat::new(1.0 + EPSILON_F64 * 0.5))
+        );
+
+        assert_ne!(none_f64, Some(ExtendedFloat::new(1.0)));
+        assert_ne!(Some(ExtendedFloat::new(1.0)), none_f64);
+
+        assert_ne!(Some(ExtendedFloat::new(1.0)), Some(ExtendedFloat::new(2.0)));
+        assert_ne!(
+            Some(ExtendedFloat::new(1.0)),
+            Some(ExtendedFloat::new(1.0 + EPSILON_F64 * 10.0))
+        );
+
+        let opt1 = Some(ExtendedFloat::new(1.0));
+        let opt2 = Some(ExtendedFloat::new(1.0));
+        let none_opt: Option<ExtendedFloat<f64>> = None;
+
+        let ref1 = &opt1;
+        let ref2 = &opt2;
+        let ref_none = &none_opt;
+
+        assert_eq!(ref1, ref2);
+        assert_ne!(ref1, ref_none);
+    }
+
+    #[test]
+    fn test_smart_pointers_equality() {
+        let opt1 = Some(ExtendedFloat::new(1.0));
+        let opt2 = Some(ExtendedFloat::new(1.0));
+        let none_opt: Option<ExtendedFloat<f64>> = None;
+
+        let rc1 = Rc::new(opt1);
+        let rc2 = Rc::new(opt2);
+        let rc_none = Rc::new(none_opt);
+
+        assert_eq!(*rc1, *rc2);
+        assert_ne!(*rc1, *rc_none);
     }
 }
 
