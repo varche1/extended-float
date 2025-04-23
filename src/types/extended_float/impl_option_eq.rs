@@ -21,18 +21,22 @@ mod tests {
         let none_f64: Option<ExtendedFloat<f64>> = None;
         assert!(none_f64.equal_option(&none_f64));
 
-        assert!(Some(ExtendedFloat(1.0)).equal_option(&Some(ExtendedFloat(1.0))));
+        assert!(Some(ExtendedFloat::new(1.0)).equal_option(&Some(ExtendedFloat::new(1.0))));
 
         assert!(
-            Some(ExtendedFloat(1.0)).equal_option(&Some(ExtendedFloat(1.0 + EPSILON_F64 * 0.5)))
+            Some(ExtendedFloat::new(1.0))
+                .equal_option(&Some(ExtendedFloat::new(1.0 + EPSILON_F64 * 0.5)))
         );
 
-        assert!(!none_f64.equal_option(&Some(ExtendedFloat(1.0))));
-        assert!(!Some(ExtendedFloat(1.0)).equal_option(&none_f64));
+        assert!(!none_f64.equal_option(&Some(ExtendedFloat::new(1.0))));
+        assert!(!Some(ExtendedFloat::new(1.0)).equal_option(&none_f64));
 
-        assert!(!Some(ExtendedFloat(1.0)).equal_option(&Some(ExtendedFloat(2.0))));
+        assert!(!Some(ExtendedFloat::new(1.0)).equal_option(&Some(ExtendedFloat::new(2.0))));
         assert!(
-            !Some(ExtendedFloat(1.0)).equal_option(&Some(ExtendedFloat(1.0 + EPSILON_F64 * 10.0)))
+            !Some(ExtendedFloat::new(1.0))
+                .equal_option(&Some(ExtendedFloat::new(1.0 + EPSILON_F64 * 10.0)))
         );
     }
+
+    //
 }

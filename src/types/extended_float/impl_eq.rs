@@ -5,22 +5,22 @@ use crate::traits::{DisplayableFloat, Float};
 
 impl<T: DisplayableFloat> PartialEq for ExtendedFloat<T> {
     fn eq(&self, other: &Self) -> bool {
-        if self.0 == other.0 {
+        if self.downgrade() == other.downgrade() {
             return true;
         }
 
-        if self.0.is_nan() || other.0.is_nan() {
+        if self.downgrade().is_nan() || other.downgrade().is_nan() {
             return false;
         }
 
-        let abs_diff = (self.0 - other.0).abs();
+        let abs_diff = (self.downgrade() - other.downgrade()).abs();
         let epsilon = <T as Float>::epsilon();
 
         if abs_diff <= epsilon {
             return true;
         }
 
-        abs_diff < epsilon * self.0.abs().min(other.0.abs())
+        abs_diff < epsilon * self.downgrade().abs().min(other.downgrade().abs())
     }
 }
 
@@ -38,7 +38,7 @@ mod tests {
         for _ in 0..count {
             start -= decrement;
         }
-        ExtendedFloat(start)
+        ExtendedFloat::new(start)
     }
 
     #[test]
@@ -48,7 +48,7 @@ mod tests {
         for i in 0..total {
             let expected = (i as f64) / 10.0;
             let actual = calculate_f64(9.0 + expected, 0.2, 45);
-            if actual == ExtendedFloat(expected) {
+            if actual == ExtendedFloat::new(expected) {
                 count += 1;
             }
         }
@@ -327,65 +327,89 @@ mod tests {
         ];
 
         for case in cases {
-            assert_eq!(ExtendedFloat(case.a) == ExtendedFloat(case.b), case.equal);
+            assert_eq!(
+                ExtendedFloat::new(case.a) == ExtendedFloat::new(case.b),
+                case.equal
+            );
         }
     }
 
     #[test]
     fn test_zero_equality() {
         // Test zero equality
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(0.0));
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(-0.0));
+        assert_eq!(ExtendedFloat::new(0.0), ExtendedFloat::new(0.0));
+        assert_eq!(ExtendedFloat::new(0.0), ExtendedFloat::new(-0.0));
 
         // Numbers very close to zero should be equal to zero
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(EPSILON_F64 * 0.5));
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(-EPSILON_F64 * 0.5));
+        assert_eq!(
+            ExtendedFloat::new(0.0),
+            ExtendedFloat::new(EPSILON_F64 * 0.5)
+        );
+        assert_eq!(
+            ExtendedFloat::new(0.0),
+            ExtendedFloat::new(-EPSILON_F64 * 0.5)
+        );
 
         // Numbers just at epsilon boundary
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(EPSILON_F64));
-        assert_eq!(ExtendedFloat(0.0), ExtendedFloat(-EPSILON_F64));
+        assert_eq!(ExtendedFloat::new(0.0), ExtendedFloat::new(EPSILON_F64));
+        assert_eq!(ExtendedFloat::new(0.0), ExtendedFloat::new(-EPSILON_F64));
 
         // Numbers beyond epsilon boundary
-        assert_ne!(ExtendedFloat(0.0), ExtendedFloat(EPSILON_F64 * 10.0));
-        assert_ne!(ExtendedFloat(0.0), ExtendedFloat(-EPSILON_F64 * 10.0));
+        assert_ne!(
+            ExtendedFloat::new(0.0),
+            ExtendedFloat::new(EPSILON_F64 * 10.0)
+        );
+        assert_ne!(
+            ExtendedFloat::new(0.0),
+            ExtendedFloat::new(-EPSILON_F64 * 10.0)
+        );
     }
 
     #[test]
     fn test_special_values_f64() {
         // NaN should never equal anything, including itself
-        assert_ne!(ExtendedFloat(f64::NAN), ExtendedFloat(f64::NAN));
-        assert_ne!(ExtendedFloat(f64::NAN), ExtendedFloat(0.0));
-        assert_ne!(ExtendedFloat(f64::NAN), ExtendedFloat(1.0));
+        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(f64::NAN));
+        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(0.0));
+        assert_ne!(ExtendedFloat::new(f64::NAN), ExtendedFloat::new(1.0));
 
         // Infinity comparisons
-        assert_eq!(ExtendedFloat(f64::INFINITY), ExtendedFloat(f64::INFINITY));
         assert_eq!(
-            ExtendedFloat(f64::NEG_INFINITY),
-            ExtendedFloat(f64::NEG_INFINITY)
+            ExtendedFloat::new(f64::INFINITY),
+            ExtendedFloat::new(f64::INFINITY)
+        );
+        assert_eq!(
+            ExtendedFloat::new(f64::NEG_INFINITY),
+            ExtendedFloat::new(f64::NEG_INFINITY)
         );
         assert_ne!(
-            ExtendedFloat(f64::INFINITY),
-            ExtendedFloat(f64::NEG_INFINITY)
+            ExtendedFloat::new(f64::INFINITY),
+            ExtendedFloat::new(f64::NEG_INFINITY)
         );
-        assert_ne!(ExtendedFloat(f64::INFINITY), ExtendedFloat(0.0));
-        assert_ne!(ExtendedFloat(f64::NEG_INFINITY), ExtendedFloat(0.0));
+        assert_ne!(ExtendedFloat::new(f64::INFINITY), ExtendedFloat::new(0.0));
+        assert_ne!(
+            ExtendedFloat::new(f64::NEG_INFINITY),
+            ExtendedFloat::new(0.0)
+        );
     }
 
     #[test]
     fn test_eq_trait_usage() {
-        let values = [(ExtendedFloat(1.0), "one"), (ExtendedFloat(2.0), "two")];
+        let values = [
+            (ExtendedFloat::new(1.0), "one"),
+            (ExtendedFloat::new(2.0), "two"),
+        ];
 
-        let found = values.iter().find(|(k, _)| *k == ExtendedFloat(1.0));
-        assert_eq!(found, Some(&(ExtendedFloat(1.0), "one")));
-
-        let found = values
-            .iter()
-            .find(|(k, _)| *k == ExtendedFloat(1.0 + EPSILON_F64 * 0.5));
-        assert_eq!(found, Some(&(ExtendedFloat(1.0), "one")));
+        let found = values.iter().find(|(k, _)| *k == ExtendedFloat::new(1.0));
+        assert_eq!(found, Some(&(ExtendedFloat::new(1.0), "one")));
 
         let found = values
             .iter()
-            .find(|(k, _)| *k == ExtendedFloat(1.0 + EPSILON_F64 * 10.0));
+            .find(|(k, _)| *k == ExtendedFloat::new(1.0 + EPSILON_F64 * 0.5));
+        assert_eq!(found, Some(&(ExtendedFloat::new(1.0), "one")));
+
+        let found = values
+            .iter()
+            .find(|(k, _)| *k == ExtendedFloat::new(1.0 + EPSILON_F64 * 10.0));
         assert_eq!(found, None);
     }
 
@@ -393,9 +417,9 @@ mod tests {
     fn test_transitivity() {
         // Test transitivity property of equality
         // If a == b and b == c, then a == c
-        let a = ExtendedFloat(1.0);
-        let b = ExtendedFloat(1.0 + EPSILON_F64 * 0.3);
-        let c = ExtendedFloat(1.0 + EPSILON_F64 * 0.6);
+        let a = ExtendedFloat::new(1.0);
+        let b = ExtendedFloat::new(1.0 + EPSILON_F64 * 0.3);
+        let c = ExtendedFloat::new(1.0 + EPSILON_F64 * 0.6);
 
         assert_eq!(a, b);
         assert_eq!(b, c);

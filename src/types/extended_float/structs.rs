@@ -3,9 +3,14 @@ use std::fmt::Write;
 use crate::traits::{DisplayableFloat, Float};
 
 #[derive(Debug, Clone, Copy)]
-pub struct ExtendedFloat<T: DisplayableFloat>(pub T);
+pub struct ExtendedFloat<T: DisplayableFloat>(T);
 
 // TODO: make a forbidden of NaN, Inf, etc...
+// TODO: From trait
+// TODO: ord trait
+// TODO: fast from string creation
+// TODO: round_by_step?
+// TODO: ceil_by_step?
 impl<T: DisplayableFloat> ExtendedFloat<T> {
     pub fn new(value: T) -> Self {
         Self(value)
@@ -49,6 +54,36 @@ impl<T: DisplayableFloat> ExtendedFloat<T> {
         }
 
         formatted
+    }
+
+    #[inline(always)]
+    pub fn downgrade(&self) -> T {
+        self.0
+    }
+
+    #[inline(always)]
+    pub fn update(&mut self, value: T) {
+        self.0 = value;
+    }
+
+    #[inline(always)]
+    pub fn is_infinite(&self) -> bool {
+        self.0.is_infinite()
+    }
+
+    #[inline(always)]
+    pub fn is_nan(&self) -> bool {
+        self.0.is_nan()
+    }
+
+    #[inline(always)]
+    pub fn is_sign_positive(&self) -> bool {
+        self.0.is_sign_positive()
+    }
+
+    #[inline(always)]
+    pub fn is_sign_negative(&self) -> bool {
+        self.0.is_sign_negative()
     }
 }
 
