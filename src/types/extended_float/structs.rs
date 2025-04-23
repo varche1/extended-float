@@ -7,10 +7,16 @@ pub struct ExtendedFloat<T: DisplayableFloat>(T);
 
 // TODO: make a forbidden of NaN, Inf, etc...
 // TODO: From trait
-// TODO: ord trait
 // TODO: fast from string creation
 // TODO: round_by_step?
 // TODO: ceil_by_step?
+// TODO: Memory layout optimization:
+//  No explicit attention to cache-line alignment
+//  Consider padding or alignment attributes for better cache performance
+// TODO: SIMD opportunities:
+//  No SIMD optimizations yet, which could give significant performance improvements
+//  Consider implementing batch operations with SIMD
+// TODO: all the operation comparison with f64, popular crates?
 impl<T: DisplayableFloat> ExtendedFloat<T> {
     pub fn new(value: T) -> Self {
         Self(value)
