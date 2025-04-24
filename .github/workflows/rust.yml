@@ -1,22 +1,60 @@
-name: Rust
+name: Rust CI (nightly)
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches: ["**"]
+  pull_request:   # all
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
+    name: Build & Test • ${{ matrix.os }} • nightly
+    runs-on: ${{ matrix.os }}
 
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust (nightly)
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry & index
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key:  ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache build artifacts (target)
+        uses: actions/cache@v4
+        with:
+          path: target
+          key:  ${{ runner.os }}-target-nightly-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-target-nightly-
+
+      - name: cargo build
+        run:  cargo build --workspace --all-features --verbose
+
+      - name: cargo test
+        run:  cargo test  --workspace --all-features --verbose
+
+      # - name: cargo fmt --check
+      #   run:  cargo fmt --all -- --check
+
+      # - name: cargo clippy
+      #   run:  cargo clippy --workspace --all-features -- -D warnings
