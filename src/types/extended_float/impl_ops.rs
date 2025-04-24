@@ -8,12 +8,28 @@ use crate::traits::DisplayableFloat;
 impl<T: DisplayableFloat> Sub for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Subtracts two ExtendedFloat values.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
+    ///
+    /// For a non-panicking version, use `checked_sub` or `try_sub`.
     fn sub(self, other: Self) -> Self::Output {
         Self::new(self.downgrade() - other.downgrade())
     }
 }
 
 impl<T: DisplayableFloat> SubAssign for ExtendedFloat<T> {
+    /// Subtracts another ExtendedFloat value from this one.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
     fn sub_assign(&mut self, other: Self) {
         self.update(self.downgrade() - other.downgrade());
     }
@@ -22,12 +38,28 @@ impl<T: DisplayableFloat> SubAssign for ExtendedFloat<T> {
 impl<T: DisplayableFloat> Add for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Adds two ExtendedFloat values.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
+    ///
+    /// For a non-panicking version, use `checked_add` or `try_add`.
     fn add(self, other: Self) -> Self::Output {
         Self::new(self.downgrade() + other.downgrade())
     }
 }
 
 impl<T: DisplayableFloat> AddAssign for ExtendedFloat<T> {
+    /// Adds another ExtendedFloat value to this one.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
     fn add_assign(&mut self, other: Self) {
         self.update(self.downgrade() + other.downgrade());
     }
@@ -36,12 +68,28 @@ impl<T: DisplayableFloat> AddAssign for ExtendedFloat<T> {
 impl<T: DisplayableFloat> Mul for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Multiplies two ExtendedFloat values.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
+    ///
+    /// For a non-panicking version, use `checked_mul` or `try_mul`.
     fn mul(self, other: Self) -> Self::Output {
         Self::new(self.downgrade() * other.downgrade())
     }
 }
 
 impl<T: DisplayableFloat> MulAssign for ExtendedFloat<T> {
+    /// Multiplies this ExtendedFloat value by another.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., overflow)
     fn mul_assign(&mut self, other: Self) {
         self.update(self.downgrade() * other.downgrade());
     }
@@ -50,12 +98,28 @@ impl<T: DisplayableFloat> MulAssign for ExtendedFloat<T> {
 impl<T: DisplayableFloat> Div for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Divides two ExtendedFloat values.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., division by zero)
+    ///
+    /// For a non-panicking version, use `checked_div` or `try_div`.
     fn div(self, other: Self) -> Self::Output {
         Self::new(self.downgrade() / other.downgrade())
     }
 }
 
 impl<T: DisplayableFloat> DivAssign for ExtendedFloat<T> {
+    /// Divides this ExtendedFloat value by another.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., division by zero)
     fn div_assign(&mut self, other: Self) {
         self.update(self.downgrade() / other.downgrade());
     }
@@ -64,12 +128,28 @@ impl<T: DisplayableFloat> DivAssign for ExtendedFloat<T> {
 impl<T: DisplayableFloat> Rem for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Calculates the remainder of the division of two ExtendedFloat values.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., remainder by zero)
+    ///
+    /// For a non-panicking version, use `checked_rem` or `try_rem`.
     fn rem(self, other: Self) -> Self::Output {
         Self::new(self.downgrade() % other.downgrade())
     }
 }
 
 impl<T: DisplayableFloat> RemAssign for ExtendedFloat<T> {
+    /// Sets this ExtendedFloat value to the remainder of division by another.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if:
+    /// - Either operand contains an invalid value (NaN, infinity)
+    /// - The result would be NaN or infinite (e.g., remainder by zero)
     fn rem_assign(&mut self, other: Self) {
         self.update(self.downgrade() % other.downgrade());
     }
@@ -78,6 +158,11 @@ impl<T: DisplayableFloat> RemAssign for ExtendedFloat<T> {
 impl<T: DisplayableFloat> Neg for ExtendedFloat<T> {
     type Output = Self;
 
+    /// Negates this ExtendedFloat value.
+    ///
+    /// # Panics
+    ///
+    /// This operation will panic if the operand contains an invalid value (NaN, infinity).
     fn neg(self) -> Self::Output {
         Self::new(-self.downgrade())
     }
@@ -288,7 +373,7 @@ mod tests {
     #[should_panic]
     fn test_with_edge_cases_add() {
         // Test with infinity
-        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let inf = unsafe { ExtendedFloat::new_unchecked(f64::INFINITY) };
         let _ = inf + ExtendedFloat::new(5.0);
     }
 
@@ -296,7 +381,7 @@ mod tests {
     #[should_panic]
     fn test_with_edge_cases_sub() {
         // Test with infinity
-        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let inf = unsafe { ExtendedFloat::new_unchecked(f64::INFINITY) };
         let _ = inf - ExtendedFloat::new(5.0);
     }
 
@@ -304,7 +389,7 @@ mod tests {
     #[should_panic]
     fn test_with_edge_cases_mul() {
         // Test with infinity
-        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let inf = unsafe { ExtendedFloat::new_unchecked(f64::INFINITY) };
         let _ = inf * ExtendedFloat::new(5.0);
     }
 
@@ -312,7 +397,7 @@ mod tests {
     #[should_panic]
     fn test_with_edge_cases_div() {
         // Test with infinity
-        let inf = ExtendedFloat::new_unchecked(f64::INFINITY);
+        let inf = unsafe { ExtendedFloat::new_unchecked(f64::INFINITY) };
         let _ = inf / ExtendedFloat::new(5.0);
     }
 

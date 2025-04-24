@@ -48,7 +48,7 @@ impl<T: DisplayableFloat> ExtendedFloat<T> {
                 Err(ConversionError::Infinite)
             }
         } else {
-            Ok(Self::new_unchecked(value))
+            Ok(unsafe { Self::new_unchecked(value) })
         }
     }
 }
@@ -95,13 +95,13 @@ mod tests {
     #[test]
     #[should_panic(expected = "ExtendedFloat doesn't support NaN values")]
     fn test_from_panics_on_nan() {
-        ExtendedFloat::from(f64::NAN);
+        let _ = ExtendedFloat::from(f64::NAN);
     }
 
     #[test]
     #[should_panic(expected = "ExtendedFloat doesn't support infinite values")]
     fn test_from_panics_on_infinity() {
-        ExtendedFloat::from(f64::INFINITY);
+        let _ = ExtendedFloat::from(f64::INFINITY);
     }
 
     #[test]

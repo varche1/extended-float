@@ -65,10 +65,14 @@ impl<T: DisplayableFloat> ExtendedFloat<T> {
     ///
     /// # Safety
     ///
-    /// This method skips validation checks for performance-critical code paths.
+    /// This method is unsafe because:
+    /// 1. It bypasses validation checks for NaN and infinite values
+    /// 2. Using invalid values in arithmetic operations will cause panics
+    /// 3. No guarantees are made about behavior with invalid values
+    ///
     /// The caller must ensure the value is neither NaN nor infinite.
     #[inline]
-    pub fn new_unchecked(value: T) -> Self {
+    pub unsafe fn new_unchecked(value: T) -> Self {
         Self(value)
     }
 
@@ -142,10 +146,14 @@ impl<T: DisplayableFloat> ExtendedFloat<T> {
     ///
     /// # Safety
     ///
-    /// This method skips validation for performance-critical code paths.
+    /// This method is unsafe because:
+    /// 1. It bypasses validation checks for NaN and infinite values
+    /// 2. Using invalid values in arithmetic operations will cause panics
+    /// 3. No guarantees are made about behavior with invalid values
+    ///
     /// The caller must ensure the value is neither NaN nor infinite.
     #[inline(always)]
-    pub fn update_unchecked(&mut self, value: T) {
+    pub unsafe fn update_unchecked(&mut self, value: T) {
         self.0 = value;
     }
 
@@ -211,10 +219,16 @@ mod tests {
         #[test]
         fn test_zero_formatting() {
             // Test values near zero are formatted as "0"
-            assert_eq!(ExtendedFloat::new_unchecked(EPSILON_F64).to_string(), "0");
-            assert_eq!(ExtendedFloat::new_unchecked(-EPSILON_F64).to_string(), "0");
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.0000000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(EPSILON_F64) }.to_string(),
+                "0"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(-EPSILON_F64) }.to_string(),
+                "0"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.0000000000000001) }.to_string(),
                 "0"
             );
         }
@@ -222,13 +236,16 @@ mod tests {
         #[test]
         fn test_special_values() {
             // Test NaN and infinity formatting
-            assert_eq!(ExtendedFloat::new_unchecked(f64::NAN).to_string(), "NaN");
             assert_eq!(
-                ExtendedFloat::new_unchecked(f64::INFINITY).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(f64::NAN) }.to_string(),
+                "NaN"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(f64::INFINITY) }.to_string(),
                 "inf"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(f64::NEG_INFINITY).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(f64::NEG_INFINITY) }.to_string(),
                 "-inf"
             );
         }
@@ -237,41 +254,65 @@ mod tests {
         fn test_trailing_zeros_removal() {
             // Test trailing zeros and decimal point are removed correctly
             assert_eq!(
-                ExtendedFloat::new_unchecked(123.4560).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(123.4560) }.to_string(),
                 "123.456"
             );
-            assert_eq!(ExtendedFloat::new_unchecked(123.0000).to_string(), "123");
-            assert_eq!(ExtendedFloat::new_unchecked(0.00100).to_string(), "0.001");
-            assert_eq!(ExtendedFloat::new_unchecked(1234.50).to_string(), "1234.5");
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(123.0000) }.to_string(),
+                "123"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.00100) }.to_string(),
+                "0.001"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(1234.50) }.to_string(),
+                "1234.5"
+            );
         }
 
         #[test]
         fn test_decimal_precision() {
             // Test regular decimals with different precision
-            assert_eq!(ExtendedFloat::new_unchecked(0.1).to_string(), "0.1");
-            assert_eq!(ExtendedFloat::new_unchecked(0.01).to_string(), "0.01");
-            assert_eq!(ExtendedFloat::new_unchecked(0.001).to_string(), "0.001");
-            assert_eq!(ExtendedFloat::new_unchecked(0.0001).to_string(), "0.0001");
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.12345678).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.1) }.to_string(),
+                "0.1"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.01) }.to_string(),
+                "0.01"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.001) }.to_string(),
+                "0.001"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.0001) }.to_string(),
+                "0.0001"
+            );
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(0.12345678) }.to_string(),
                 "0.12345678"
             );
-            assert_eq!(ExtendedFloat::new_unchecked(1234.56).to_string(), "1234.56");
+            assert_eq!(
+                unsafe { ExtendedFloat::new_unchecked(1234.56) }.to_string(),
+                "1234.56"
+            );
         }
 
         #[test]
         fn test_rounding_behavior() {
             // Test rounding behavior at precision boundaries
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.5000000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.5000000000000001) }.to_string(),
                 "0.5"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.4999999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.4999999999999999) }.to_string(),
                 "0.5"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(1.5000000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(1.5000000000000001) }.to_string(),
                 "1.5"
             );
         }
@@ -280,19 +321,19 @@ mod tests {
         fn test_precision_boundary() {
             // Test values at the precision boundary (14-15 digits)
             assert_eq!(
-                ExtendedFloat::new_unchecked(4.00000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(4.00000000000001) }.to_string(),
                 "4.00000000000001"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(4.000000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(4.000000000000001) }.to_string(),
                 "4"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(-4.00000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(-4.00000000000001) }.to_string(),
                 "-4.00000000000001"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(-4.000000000000001).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(-4.000000000000001) }.to_string(),
                 "-4"
             );
         }
@@ -301,11 +342,11 @@ mod tests {
         fn test_constants() {
             // Test mathematical constants
             assert_eq!(
-                ExtendedFloat::new_unchecked(std::f64::consts::PI).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(std::f64::consts::PI) }.to_string(),
                 "3.14159265358979"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(std::f64::consts::E).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(std::f64::consts::E) }.to_string(),
                 "2.71828182845905"
             );
         }
@@ -314,39 +355,39 @@ mod tests {
         fn test_values_near_one() {
             // Test values near 1.0 with different precision
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.999999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.999999999999999) }.to_string(),
                 "0.999999999999999"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.9999999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.9999999999999999) }.to_string(),
                 "1"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(-0.999999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(-0.999999999999999) }.to_string(),
                 "-0.999999999999999"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(-0.9999999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(-0.9999999999999999) }.to_string(),
                 "-1"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.99999999999999).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.99999999999999) }.to_string(),
                 "0.99999999999999"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.999999999999995).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.999999999999995) }.to_string(),
                 "0.999999999999995"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.9999999999999995).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.9999999999999995) }.to_string(),
                 "0.999999999999999"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.999999999999991).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.999999999999991) }.to_string(),
                 "0.999999999999991"
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(0.9999999999999991).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(0.9999999999999991) }.to_string(),
                 "0.999999999999999"
             );
         }
@@ -355,11 +396,11 @@ mod tests {
         fn test_border_cases() {
             // Border cases, should be formatted as is
             assert_eq!(
-                ExtendedFloat::new_unchecked(f64::MAX).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(f64::MAX) }.to_string(),
                 f64::MAX.to_string()
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(f64::MIN).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(f64::MIN) }.to_string(),
                 f64::MIN.to_string()
             );
 
@@ -367,11 +408,11 @@ mod tests {
             let max_sub_border_plus = f64::MAX / DECIMAL_PRECISION_F64 + 1.0;
             let min_sub_border_minus = f64::MIN / DECIMAL_PRECISION_F64 - 1.0;
             assert_eq!(
-                ExtendedFloat::new_unchecked(max_sub_border_plus).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(max_sub_border_plus) }.to_string(),
                 max_sub_border_plus.to_string()
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(min_sub_border_minus).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(min_sub_border_minus) }.to_string(),
                 min_sub_border_minus.to_string()
             );
 
@@ -379,11 +420,11 @@ mod tests {
             let max_sub_border_minus = f64::MAX / DECIMAL_PRECISION_F64 - 1.0;
             let min_sub_border_plus = f64::MIN / DECIMAL_PRECISION_F64 + 1.0;
             assert_eq!(
-                ExtendedFloat::new_unchecked(max_sub_border_minus).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(max_sub_border_minus) }.to_string(),
                 max_sub_border_minus.to_string()
             );
             assert_eq!(
-                ExtendedFloat::new_unchecked(min_sub_border_plus).to_string(),
+                unsafe { ExtendedFloat::new_unchecked(min_sub_border_plus) }.to_string(),
                 min_sub_border_plus.to_string()
             );
         }
@@ -397,7 +438,7 @@ mod tests {
                 for j in 1..5 {
                     let value = 4.0 + (j as f64) / 10.0_f64.powf(i as f64);
                     let expected = format!("{:.*}", precision, value);
-                    let actual = ExtendedFloat::new_unchecked(value).to_string();
+                    let actual = unsafe { ExtendedFloat::new_unchecked(value) }.to_string();
                     assert_eq!(
                         actual, expected,
                         "Failed for precision {} value {}",
@@ -423,7 +464,7 @@ mod tests {
             ];
 
             for value in test_values {
-                let formatted = ExtendedFloat::new_unchecked(value).to_string();
+                let formatted = unsafe { ExtendedFloat::new_unchecked(value) }.to_string();
                 let parsed: f64 = formatted.parse().unwrap();
 
                 // Check that difference is within epsilon
