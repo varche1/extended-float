@@ -30,6 +30,8 @@ impl<T: DisplayableFloat> Eq for ExtendedFloat<T> {}
 mod tests {
     use std::rc::Rc;
 
+    use pretty_assertions::assert_eq;
+
     use crate::constants::f64::EPSILON as EPSILON_F64;
     use crate::types::ExtendedFloat;
 

@@ -4,7 +4,7 @@ use std::fmt::Write;
 use crate::traits::{DisplayableFloat, Float};
 use crate::utils::{check_invalid_float, is_valid_float};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct ExtendedFloat<T: DisplayableFloat>(T);
 
 // TODO: From trait
@@ -181,10 +181,18 @@ impl<T: DisplayableFloat> ExtendedFloat<T> {
 #[cfg(test)]
 #[allow(clippy::excessive_precision)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::constants::f64::{
         DECIMAL_PRECISION as DECIMAL_PRECISION_F64, EPSILON as EPSILON_F64,
     };
+
+    #[test]
+    fn test_default() {
+        let item = ExtendedFloat::<f64>::default();
+        assert_eq!(item.downgrade(), 0.0f64);
+    }
 
     #[test]
     fn test_try_new_validation() {

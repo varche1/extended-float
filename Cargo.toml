@@ -20,8 +20,18 @@ pretty_assertions = "1"
 criterion = "0.5"
 fastnum = "0.2"
 rust_decimal = "1.37"
+rand = "<1"
 
 [[bench]]
 name = "bench_ops"
 harness = false
 path = "benches/bench_ops.rs"
+
+[[bench]]
+name = "bench_conversions"
+harness = false
+path = "benches/bench_conversions.rs"
+
+[[test]]
+name = "bench_utils_test"
+path = "benches/common/random.rs"

@@ -45,6 +45,8 @@ impl<T: DisplayableFloat> CheckedFloatOps for ExtendedFloat<T> {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

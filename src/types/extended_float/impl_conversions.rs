@@ -1,5 +1,6 @@
 use std::convert::From;
 use std::fmt;
+use std::str::FromStr;
 
 use super::ExtendedFloat;
 use crate::traits::DisplayableFloat;
@@ -31,6 +32,20 @@ impl<T: DisplayableFloat> From<T> for ExtendedFloat<T> {
     #[inline]
     fn from(value: T) -> Self {
         Self::new(value)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum FromStrError {
+    Invalid,
+}
+
+impl<T: DisplayableFloat + FromStr> FromStr for ExtendedFloat<T> {
+    type Err = FromStrError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let v: T = s.parse().map_err(|_| FromStrError::Invalid)?;
+        ExtendedFloat::try_from_value(v).map_err(|_| FromStrError::Invalid)
     }
 }
 
@@ -69,6 +84,8 @@ impl<T: DisplayableFloat + Into<f64>> From<ExtendedFloat<T>> for f64 {
 #[cfg(test)]
 mod tests {
     use std::f64::consts::PI;
+
+    use pretty_assertions::assert_eq;
 
     use super::*;
 
@@ -130,5 +147,83 @@ mod tests {
         let extended = ExtendedFloat::new(-123.456);
         let value: f64 = extended.into();
         assert_eq!(value, -123.456);
+    }
+
+    #[test]
+    fn test_from_str_valid() {
+        let ef: ExtendedFloat<f64> = "42.42".parse().unwrap();
+        assert_eq!(ef.downgrade(), 42.42);
+
+        let ef: ExtendedFloat<f64> = "42".parse().unwrap();
+        assert_eq!(ef.downgrade(), 42.0);
+
+        // Scientific notation
+        let ef: ExtendedFloat<f64> = "1.5e3".parse().unwrap();
+        assert_eq!(ef.downgrade(), 1500.0);
+
+        let ef: ExtendedFloat<f64> = "1.5E-3".parse().unwrap();
+        assert_eq!(ef.downgrade(), 0.0015);
+
+        // Negative numbers
+        let ef: ExtendedFloat<f64> = "-123.456".parse().unwrap();
+        assert_eq!(ef.downgrade(), -123.456);
+
+        // Edge cases
+        let ef: ExtendedFloat<f64> = "0.0".parse().unwrap();
+        assert_eq!(ef.downgrade(), 0.0);
+
+        let ef: ExtendedFloat<f64> = "0".parse().unwrap();
+        assert_eq!(ef.downgrade(), 0.0);
+
+        let ef: ExtendedFloat<f64> = "9007199254740992".parse().unwrap(); // 2^53
+        assert_eq!(ef.downgrade(), 9007199254740992.0);
+    }
+
+    #[test]
+    fn test_from_str_invalid() {
+        let err = "not_a_number".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "-".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "+".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "1/1".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        // Special floating point values (not supported by ExtendedFloat)
+        let err = "NaN".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "Infinity".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "-Infinity".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        // Malformed numbers
+        let err = "1.2.3".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "1e".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "e10".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "123abc".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        let err = "0x123".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
+
+        // Whitespace handling must be somewhere over parsing
+        let err = "  42.5  ".parse::<ExtendedFloat<f64>>().unwrap_err();
+        assert_eq!(err, FromStrError::Invalid);
     }
 }

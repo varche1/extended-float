@@ -172,6 +172,8 @@ impl<T: DisplayableFloat> Neg for ExtendedFloat<T> {
 mod tests {
     use std::f64::consts::{E, PI};
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::constants::f64::EPSILON as EPSILON_F64;
 
