@@ -16,11 +16,11 @@ dtoa = "1"
 
 # TODO: remove unnecessary
 [dev-dependencies]
-pretty_assertions = "1"
-criterion = "0.5"
-fastnum = "0.2"
-rust_decimal = "1.37"
-rand = "<1"
+pretty_assertions = "^1"
+criterion = "^0.5"
+fastnum = "^0.2"
+rust_decimal = "^1.37"
+rand = "^0.9"
 
 [[bench]]
 name = "bench_ops"
