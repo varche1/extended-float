@@ -51,6 +51,7 @@ impl Iterator for RandomF64StringIterator {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]
