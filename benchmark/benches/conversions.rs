@@ -4,12 +4,12 @@ mod common;
 
 use std::str::FromStr;
 
-use common::files::read_lines_from_file;
+use common::files::read_file_as_strings;
 use common::random::RandomF64StringIterator;
 
 const SEED: u64 = 123456789;
 // const PRECISIONS: [usize; 1] = [0,];
-const PRECISIONS: [usize; 5] = [0, 1, 3, 5, 10];
+const PRECISIONS: [usize; 4] = [0, 1, 5, 10];
 
 // TODO: add benches with other crates
 // TODO: try other bench created (CPU counters)
@@ -36,12 +36,8 @@ fn bench_conversions(c: &mut Criterion) {
 
     // TODO: preallocate vec
     group.bench_function("parse entire file", |b| {
-        let file_data =
-            read_lines_from_file("test_data/prices.log").expect("Failed to read data from file");
-        let data: Vec<String> = file_data
-            .iter()
-            .map(|bytes: &Vec<u8>| String::from_utf8(bytes.clone()).expect("invalid UTF-8"))
-            .collect();
+        let data =
+            read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
 
         b.iter(|| {
             let results: Vec<ExtendedFloat<f64>> =
@@ -75,12 +71,8 @@ fn bench_conversions_f64(c: &mut Criterion) {
     }
 
     group.bench_function("parse entire file", |b| {
-        let file_data =
-            read_lines_from_file("test_data/prices.log").expect("Failed to read data from file");
-        let data: Vec<String> = file_data
-            .iter()
-            .map(|bytes: &Vec<u8>| String::from_utf8(bytes.clone()).expect("invalid UTF-8"))
-            .collect();
+        let data =
+            read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
 
         b.iter(|| {
             let results: Vec<f64> = data.iter().map(|line| line.parse().unwrap()).collect();
@@ -117,12 +109,8 @@ fn bench_conversions_fastnum(c: &mut Criterion) {
     }
 
     group.bench_function("parse entire file", |b| {
-        let file_data =
-            read_lines_from_file("test_data/prices.log").expect("Failed to read data from file");
-        let data: Vec<String> = file_data
-            .iter()
-            .map(|bytes: &Vec<u8>| String::from_utf8(bytes.clone()).expect("invalid UTF-8"))
-            .collect();
+        let data =
+            read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
 
         b.iter(|| {
             let results: Vec<fastnum::decimal::Decimal<64>> = data
@@ -164,19 +152,50 @@ fn bench_conversions_bigdecimal(c: &mut Criterion) {
     }
 
     group.bench_function("parse entire file", |b| {
-        let file_data =
-            read_lines_from_file("test_data/prices.log").expect("Failed to read data from file");
-        let data: Vec<String> = file_data
-            .iter()
-            .map(|bytes: &Vec<u8>| String::from_utf8(bytes.clone()).expect("invalid UTF-8"))
-            .collect();
+        let data =
+            read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
 
         b.iter(|| {
             let results: Vec<bigdecimal::BigDecimal> = data
                 .iter()
-                .map(|line| {
-                    bigdecimal::BigDecimal::from_str(line).unwrap()
-                })
+                .map(|line| bigdecimal::BigDecimal::from_str(line).unwrap())
+                .collect();
+            black_box(results)
+        });
+    });
+
+    group.finish();
+}
+
+#[cfg(feature = "comparison")]
+fn bench_conversions_rust_decimal(c: &mut Criterion) {
+    let mut group = c.benchmark_group("[rust_decimal]");
+
+    for precision in PRECISIONS {
+        let mut iter = RandomF64StringIterator::new(SEED, precision, -100_000.0..=100_000.0);
+        group.bench_function(
+            format!("parse from string {}_precision", precision).as_str(),
+            |b| {
+                b.iter_batched(
+                    || iter.next().unwrap(),
+                    |data| {
+                        let result = rust_decimal::Decimal::from_str(&data).unwrap();
+                        black_box(result)
+                    },
+                    BatchSize::SmallInput,
+                )
+            },
+        );
+    }
+
+    group.bench_function("parse entire file", |b| {
+        let data =
+            read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
+
+        b.iter(|| {
+            let results: Vec<rust_decimal::Decimal> = data
+                .iter()
+                .map(|line| rust_decimal::Decimal::from_str(line).unwrap())
                 .collect();
             black_box(results)
         });
@@ -194,7 +213,8 @@ criterion_group!(
     bench_conversions,
     bench_conversions_f64,
     bench_conversions_fastnum,
-    bench_conversions_bigdecimal
+    bench_conversions_bigdecimal,
+    bench_conversions_rust_decimal
 );
 
 criterion_main!(benches);

@@ -17,3 +17,14 @@ where
 
     Ok(data)
 }
+
+pub fn read_file_as_strings<P>(filename: P) -> io::Result<Vec<String>>
+where
+    P: AsRef<Path>,
+{
+    let file_data = read_lines_from_file(filename)?;
+    Ok(file_data
+        .iter()
+        .map(|bytes| String::from_utf8(bytes.clone()).expect("invalid UTF-8"))
+        .collect())
+}
