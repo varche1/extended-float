@@ -11,6 +11,7 @@ extended_float = { path = "../" }
 fastnum = "^0.2"
 rust_decimal = "^1.37"
 bigdecimal = "^0.4.6"
+decimal-rs = "^0.1.43"
 rand = "^0.9"
 
 [[bench]]
