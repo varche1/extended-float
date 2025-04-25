@@ -1,0 +1,36 @@
+[package]
+name = "extended_float_benchmarks"
+version = "0.1.0"
+edition = "2024"
+authors = ["Ivan Gureev"]
+license = "MIT"
+
+[dev-dependencies]
+criterion = { version = "^0.5" }
+extended_float = { path = "../" }
+fastnum = "^0.2"
+rust_decimal = "^1.37"
+bigdecimal = "^0.4.6"
+rand = "^0.9"
+
+[[bench]]
+name = "ops"
+path = "benches/ops.rs"
+harness = false
+
+[[bench]]
+name = "conversions"
+path = "benches/conversions.rs"
+harness = false
+
+[[test]]
+name = "bench_utils_test"
+path = "benches/common/random.rs"
+
+[features]
+default = []
+comparison = []
+
+[profile.release]
+lto = true # enable link-time optimisation for faster runtime, but slower compile time
+opt-level = 3 # maximum optimisation level for faster runtime, but slower compile time

@@ -80,4 +80,4 @@ jobs:
             --project "extended-float" \
             --github-actions "${{ secrets.GITHUB_TOKEN }}" \
             --err \
-            "cargo bench"
+            "cargo bench --manifest-path benchmark/Cargo.toml"
