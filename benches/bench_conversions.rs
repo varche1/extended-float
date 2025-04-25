@@ -47,6 +47,7 @@ fn bench_conversions(c: &mut Criterion) {
     group.finish();
 }
 
+#[cfg(feature = "comparison_bench")]
 fn bench_conversions_f64(c: &mut Criterion) {
     let mut group = c.benchmark_group("[f64]");
 
@@ -84,5 +85,10 @@ fn bench_conversions_f64(c: &mut Criterion) {
     group.finish();
 }
 
+#[cfg(not(feature = "comparison_bench"))]
+criterion_group!(benches, bench_conversions);
+
+#[cfg(feature = "comparison_bench")]
 criterion_group!(benches, bench_conversions, bench_conversions_f64);
+
 criterion_main!(benches);

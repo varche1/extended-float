@@ -14,7 +14,6 @@ num-traits = "0.2"
 ryu = "1"
 dtoa = "1"
 
-# TODO: remove unnecessary
 [dev-dependencies]
 pretty_assertions = "^1"
 criterion = "^0.5"
@@ -35,3 +34,7 @@ path = "benches/bench_conversions.rs"
 [[test]]
 name = "bench_utils_test"
 path = "benches/common/random.rs"
+
+[features]
+default = []
+comparison_bench = []
