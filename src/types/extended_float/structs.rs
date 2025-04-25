@@ -19,6 +19,7 @@ pub struct ExtendedFloat<T: DisplayableFloat>(T);
 //  Consider implementing batch operations with SIMD
 // TODO: all the operation comparison with f64, popular crates?
 // TODO: another branch predictions (likely)?
+// TODO: need we anything for serde compability?
 impl<T: DisplayableFloat> ExtendedFloat<T> {
     /// Creates a new ExtendedFloat instance with validation.
     ///
