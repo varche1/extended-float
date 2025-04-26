@@ -16,7 +16,10 @@ build:
 	RUSTFLAGS='-C target-feature=+avx2' cargo build --release
 
 bench:
-	cargo bench --manifest-path benchmark/Cargo.toml $(filter-out $@,$(MAKECMDGOALS))
+	sudo nice -n -20 cargo bench --manifest-path benchmark/Cargo.toml $(filter-out $@,$(MAKECMDGOALS))
+
+bench-all:
+	sudo nice -n -20 cargo bench --manifest-path benchmark/Cargo.toml --features comparison $(filter-out $@,$(MAKECMDGOALS))
 
 %:
 	@:
@@ -25,7 +28,7 @@ bencher:
 	BRANCH=$$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main"); \
 	HOST=$$(hostname 2>/dev/null || echo "unknown"); \
 	TESTBED=$${BENCHER_TESTBED:-$$HOST}; \
-	bencher run --adapter rust_criterion --branch "$$BRANCH" --testbed "$$TESTBED" --project="extended-float" "cargo bench --manifest-path benchmark/Cargo.toml $(filter-out $@,$(MAKECMDGOALS))"
+	bencher run --adapter rust_criterion --branch "$$BRANCH" --testbed "$$TESTBED" --project="extended-float" "sudo nice -n -20 cargo bench --manifest-path benchmark/Cargo.toml $(filter-out $@,$(MAKECMDGOALS))"
 
 %:
 	@:

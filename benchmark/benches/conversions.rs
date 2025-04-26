@@ -2,8 +2,10 @@ use criterion::{BatchSize, Criterion, black_box, criterion_group, criterion_main
 use extended_float::types::ExtendedFloat;
 mod common;
 
+#[cfg(feature = "comparison")]
 use std::str::FromStr;
 
+use common::criterion_conf::configure_criterion;
 use common::files::read_file_as_strings;
 use common::random::RandomF64StringIterator;
 
@@ -34,7 +36,6 @@ fn bench_conversions(c: &mut Criterion) {
         );
     }
 
-    // TODO: preallocate vec
     group.bench_function("parse entire file", |b| {
         let data =
             read_file_as_strings("test_data/prices.log").expect("Failed to read data from file");
@@ -242,17 +243,22 @@ fn bench_conversions_decimal_rc(c: &mut Criterion) {
 }
 
 #[cfg(not(feature = "comparison"))]
-criterion_group!(benches, bench_conversions);
+criterion_group! {
+    name = benches;
+    config = configure_criterion();
+    targets = bench_conversions
+}
 
 #[cfg(feature = "comparison")]
-criterion_group!(
-    benches,
-    bench_conversions,
-    bench_conversions_f64,
-    bench_conversions_fastnum,
-    bench_conversions_bigdecimal,
-    bench_conversions_rust_decimal,
-    bench_conversions_decimal_rc,
-);
+criterion_group! {
+    name = benches;
+    config = configure_criterion();
+    targets = bench_conversions,
+        bench_conversions_f64,
+        bench_conversions_fastnum,
+        bench_conversions_bigdecimal,
+        bench_conversions_rust_decimal,
+        bench_conversions_decimal_rc
+}
 
 criterion_main!(benches);
