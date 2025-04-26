@@ -1,0 +1,20 @@
+[package]
+name = "extended_float_benchmarks_iai_callgrind"
+version = "0.1.0"
+edition = "2024"
+authors = ["Ivan Gureev"]
+license = "MIT"
+
+[dev-dependencies]
+extended_float = { path = "../" }
+iai-callgrind = "0.14.0"
+rand = "^0.9"
+
+[[bench]]
+name = "conversions"
+path = "benches/conversions.rs"
+harness = false
+
+[profile.release]
+lto = true # enable link-time optimisation for faster runtime, but slower compile time
+opt-level = 3 # maximum optimisation level for faster runtime, but slower compile time

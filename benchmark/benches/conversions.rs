@@ -14,7 +14,6 @@ const SEED: u64 = 123456789;
 const PRECISIONS: [usize; 4] = [0, 1, 5, 10];
 
 // TODO: add benches with other crates
-// TODO: try other bench created (CPU counters)
 
 fn bench_conversions(c: &mut Criterion) {
     let mut group = c.benchmark_group("[ExtendedFloat<f64>]");
