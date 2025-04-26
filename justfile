@@ -34,6 +34,9 @@ bencher *args:
                --project extended-float \
                "sudo nice -n -20 cargo bench --manifest-path benchmark/Cargo.toml {{args}}"
 
+bench-cpu *args:
+    sudo nice -n -20 cargo bench --manifest-path benchmark_iai_callgrind/Cargo.toml {{args}}
+
 sync host:
     @if [ -z "{{host}}" ]; then \
       echo "Usage: just sync <host>"; exit 1; \
