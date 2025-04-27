@@ -40,11 +40,11 @@ pub enum FromStrError {
     Invalid,
 }
 
-impl<T: DisplayableFloat + FromStr> FromStr for ExtendedFloat<T> {
+impl<T: DisplayableFloat + FromStr + fast_float::FastFloat> FromStr for ExtendedFloat<T> {
     type Err = FromStrError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let v: T = s.parse().map_err(|_| FromStrError::Invalid)?;
+        let v: T = fast_float::parse(s).map_err(|_| FromStrError::Invalid)?;
         ExtendedFloat::try_from_value(v).map_err(|_| FromStrError::Invalid)
     }
 }
