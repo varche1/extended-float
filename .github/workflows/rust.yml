@@ -65,10 +65,8 @@ jobs:
       - uses: bencherdev/bencher@main
       - name: Install iai-callgrind-runner
         run: |
-          version=$(cargo metadata --format-version=1 \
-            | jq '.packages[] | select(.name == "iai-callgrind").version' \
-            | tr -d '"')
-          cargo install iai-callgrind-runner --version $version
+          version=$(awk -F\" '/iai-callgrind =/ {print $2; exit}' benchmark_iai_callgrind/Cargo.toml)
+          cargo install iai-callgrind-runner --version "$version"
       - name: Run IAI-Callgrind and push to Bencher
         env:
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
