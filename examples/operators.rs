@@ -1,5 +1,6 @@
 use extended_float::types::ExtendedFloat;
 
+#[allow(clippy::eq_op)]
 fn main() {
     // Create some ExtendedFloat values
     let a = ExtendedFloat::from(10.5);

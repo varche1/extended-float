@@ -5,23 +5,25 @@ edition = "2024"
 authors = ["Ivan Gureev"]
 description = "Extended floating-point number implementation for Rust"
 license = "MIT"
+homepage = "https://github.com/varche1/extended_float"
 repository = "https://github.com/varche1/extended_float"
-keywords = ["float", "math", "numerical", "decimal", "IEEE 754"]
+readme = "README.md"
+keywords = ["float", "math", "numerical", "numeric", "decimal", "IEEE 754", "fixed-point",]
 categories = ["science", "mathematics"]
+autobenches = false
+exclude = ["examples/*", "benchmark/*"]
+
+[lib]
+bench = false
 
 [dependencies]
 num-traits = "0.2"
-ryu = "1"
-dtoa = "1"
+fast-float = "0.2"
 
-# TODO: remove unnecessary
 [dev-dependencies]
-pretty_assertions = "1"
-criterion = "0.5"
-fastnum = "0.2"
-rust_decimal = "1.37"
+pretty_assertions = "^1"
+rand = "^0.9"
 
-[[bench]]
-name = "bench_ops"
-harness = false
-path = "benches/bench_ops.rs"
+[profile.release]
+lto = true # enable link-time optimisation for faster runtime, but slower compile time
+opt-level = 3 # maximum optimisation level for faster runtime, but slower compile time

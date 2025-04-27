@@ -1,0 +1,2 @@
+[build]
+rustflags = ["-A", "long_running_const_eval"]
