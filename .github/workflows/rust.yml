@@ -32,12 +32,14 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-registry-
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
       - uses: actions/cache@v4
         with:
           path: target
           key: ${{ runner.os }}-target-nightly-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-target-nightly-
+          restore-keys: |
+            ${{ runner.os }}-target-nightly-
       - run: cargo build --workspace --all-features --verbose
       - run: cargo test --workspace --all-features --verbose
 
@@ -61,13 +63,14 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-registry-
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
       - uses: bencherdev/bencher@main
-      - name: Install iai-callgrind-runner
-        run: |
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - run: |
           version=$(awk -F\" '/iai-callgrind =/ {print $2; exit}' benchmark_iai_callgrind/Cargo.toml)
           cargo install iai-callgrind-runner --version "$version"
-      - name: Run IAI-Callgrind and push to Bencher
+      - name: Push IAI-Callgrind results to Bencher
         env:
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
         run: |
@@ -80,7 +83,7 @@ jobs:
             --github-actions "${{ secrets.GITHUB_TOKEN }}" \
             --err \
             "cargo bench --manifest-path benchmark_iai_callgrind/Cargo.toml"
-      - name: Run Criterion benches and push to Bencher
+      - name: Push Criterion benches to Bencher
         env:
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
         run: |
