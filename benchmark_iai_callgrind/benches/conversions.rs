@@ -3,17 +3,21 @@ use std::hint::black_box;
 mod common;
 use common::files::read_file_as_strings;
 use extended_float::types::ExtendedFloat;
-use iai_callgrind::{LibraryBenchmarkConfig, library_benchmark, library_benchmark_group, main};
+use iai_callgrind::{
+    FlamegraphConfig, LibraryBenchmarkConfig, library_benchmark, library_benchmark_group, main,
+};
 
 #[library_benchmark]
-#[bench::zero("0")]
-#[bench::zero_2("0.0")]
-#[bench::size_1("1.2")]
-#[bench::size_3("123.456")]
-#[bench::size_5("12345.67890")]
-#[bench::size_10("12345.1234567890")]
+#[benches::precisions(args = ["0", "0.0", "1.2", "123.456", "12345.67890", "12345.1234567890"])]
 fn from_str_simple(input: &str) -> ExtendedFloat<f64> {
     black_box(input.parse::<ExtendedFloat<f64>>().unwrap())
+}
+
+#[library_benchmark]
+#[benches::precisions(args = ["0", "0.0", "1.2", "123.456", "12345.67890", "12345.1234567890"])]
+fn from_str_simple_baseline(input: &str) -> ExtendedFloat<f64> {
+    let v: f64 = input.parse().unwrap();
+    black_box(ExtendedFloat::try_from_value(v).unwrap())
 }
 
 fn setup_from_file_100_k_sum(path: &str) -> Vec<String> {
@@ -57,10 +61,11 @@ fn bench_parse_file_allocate(
 
 library_benchmark_group!(
     name = from_str_group;
-    benchmarks = from_str_simple, bench_parse_file_sum, bench_parse_file_allocate
+    compare_by_id = true;
+    benchmarks = from_str_simple, from_str_simple_baseline, bench_parse_file_sum, bench_parse_file_allocate
 );
 
 main!(
-    config = LibraryBenchmarkConfig::default().callgrind_args(["collect-jumps=yes"]);
+    config = LibraryBenchmarkConfig::default().callgrind_args(["collect-jumps=yes"]).flamegraph(FlamegraphConfig::default());
     library_benchmark_groups = from_str_group
 );

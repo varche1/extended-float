@@ -29,13 +29,23 @@ bencher *args:
     HOST="$(hostname 2>/dev/null || echo unknown)"; \
     TESTBED="${BENCHER_TESTBED:-$HOST}"; \
     bencher run --adapter rust_criterion \
-               --branch "$$BRANCH" \
-               --testbed "$$TESTBED" \
+               --branch "$BRANCH" \
+               --testbed "$TESTBED" \
                --project extended-float \
                "sudo nice -n -20 cargo bench --manifest-path benchmark/Cargo.toml {{args}}"
 
 bench-cpu *args:
     sudo nice -n -20 cargo bench --manifest-path benchmark_iai_callgrind/Cargo.toml {{args}}
+
+bencher-cpu *args:
+    BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)"; \
+    HOST="$(hostname 2>/dev/null || echo unknown)"; \
+    TESTBED="${BENCHER_TESTBED:-$HOST}"; \
+    bencher run --adapter rust_iai_callgrind \
+               --branch "$BRANCH" \
+               --testbed "$TESTBED" \
+               --project extended-float \
+               "sudo nice -n -20 cargo bench --manifest-path benchmark_iai_callgrind/Cargo.toml {{args}}"
 
 sync host:
     @if [ -z "{{host}}" ]; then \

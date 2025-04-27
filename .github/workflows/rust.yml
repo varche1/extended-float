@@ -3,7 +3,6 @@ name: Rust CI (nightly + benches)
 on:
   push:
     branches: ["**"]
-
   pull_request:
     branches: [master]
     types: [opened, reopened, synchronize, edited]
@@ -27,7 +26,7 @@ jobs:
           profile: minimal
           override: true
           components: rustfmt, clippy
-      - uses: actions/cache@v4
+      - uses: actions-cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -40,16 +39,15 @@ jobs:
           key: ${{ runner.os }}-target-nightly-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-target-nightly-
       - run: cargo build --workspace --all-features --verbose
-      - run: cargo test  --workspace --all-features --verbose
+      - run: cargo test --workspace --all-features --verbose
 
   bench:
-    name: Benchmarks (PR → master)
+    name: Benches (PR → master)
     if: github.event_name == 'pull_request' && github.base_ref == 'master'
     runs-on: ubuntu-latest
     permissions:
       checks: write
       pull-requests: write
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
@@ -57,17 +55,33 @@ jobs:
           toolchain: nightly
           profile: minimal
           override: true
-
-      - uses: bencherdev/bencher@main
-
-      - uses: actions/cache@v4
+      - uses: actions-cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-registry-
-
+      - uses: bencherdev/bencher@main
+      - name: Install iai-callgrind-runner
+        run: |
+          version=$(cargo metadata --format-version=1 \
+            | jq '.packages[] | select(.name == "iai-callgrind").version' \
+            | tr -d '"')
+          cargo install iai-callgrind-runner --version $version
+      - name: Run IAI-Callgrind and push to Bencher
+        env:
+          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          bencher run \
+            --adapter rust_iai_callgrind \
+            --branch "$BRANCH" \
+            --testbed ci-github-ubuntu-latest \
+            --project "extended-float" \
+            --github-actions "${{ secrets.GITHUB_TOKEN }}" \
+            --err \
+            "cargo bench --manifest-path benchmark_iai_callgrind/Cargo.toml"
       - name: Run Criterion benches and push to Bencher
         env:
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
